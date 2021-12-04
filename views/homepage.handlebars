@@ -2,13 +2,13 @@
 	<div
 		class="d-flex align-items-center p-3 my-3 text-white bg-purple rounded shadow-sm"
 	>
-		<img
+		{{! <img
 			class="me-3"
 			src="/docs/5.0/assets/brand/bootstrap-logo-white.svg"
 			alt=""
 			width="48"
 			height="38"
-		/>
+		/> }}
 
 	</div>
 
@@ -16,7 +16,7 @@
 		<h6 class="border-bottom pb-2 mb-0">Posts</h6>
 
 		{{#each posts}}
-			<div class="d-flex text-muted pt-3">
+			<div class="d-flex text-muted pt-3 border-bottom">
 				<svg
 					class="bd-placeholder-img flex-shrink-0 me-2 rounded"
 					width="32"
@@ -36,12 +36,12 @@
 						fill="#e83e8c"
 						dy=".3em"
 					>32x32</text></svg>
-
-				<p class="pb-3 mb-0 small lh-sm border-bottom w-100">
-					<strong class="d-block text-gray-dark">{{title}}</strong>
-					{{content}}
-					<strong class="d-block text-gray-dark">{{user.username}}</strong>
-				</p>
+				<a href="/post/{{id}}" style="text-decoration: none; w-100 ">
+					<p class="pb-3 mb-0 small lh-sm  >
+						<strong class="d-block text-gray-dark">{{title}}</strong>
+						{{content}}
+						<strong class="d-block text-gray-dark">{{user.username}}</strong>
+					</p></a>
 			</div>
 		{{/each}}
 		{{! <div class="d-flex text-muted pt-3">
