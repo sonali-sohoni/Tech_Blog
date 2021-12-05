@@ -12,8 +12,8 @@
           <h4 class=" bg-transparent border-success h4" style="color:#DCAE1D">
              
             {{post.title}}</h4>
-          <p class="card-text" style="font-weight:bold"> <br>{{post.post_details}}</p>
-          <p class="card-text h6">By {{post.user.first_name}} On {{format_date post.created_at}}</p>
+          <p class="card-text" style="font-weight:bold"> <br>{{post.content}}</p>
+          <p class="card-text h6">By {{post.user.username}} On {{format_date post.created_at}}</p>
           {{!-- <div class="card-footer"></div> --}}
         </div>
         {{#if post.comments.length}}
@@ -23,7 +23,7 @@
         {{#each post.comments}}
         <div>
           <li>
-            {{comment_text}} by {{user.first_name}}
+            {{comment_text}} by {{user.username}}
           </li>
           <hr>
         </div>

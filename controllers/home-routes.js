@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const sequelize = require("../config/connection");
 const { Post, User, Comment } = require("../models");
+const withAuth = require("../utils/auth");
 //LANDING PAGE
 router.get("/", (req, res) => {
 	console.log(req.session);
@@ -97,12 +98,168 @@ router.get("/post/:id", (req, res) => {
 			// ],
 		],
 		include: [
+			{
+				model: Comment,
+				attributes: ["id", "comment_text", "post_id", "user_id", "created_at"],
+				include: {
+					model: User,
+					attributes: ["username"],
+				},
+			},
+			{
+				model: User,
+				attributes: ["username"],
+			},
+		],
+	})
+		.then((dbPostData) => {
+			if (!dbPostData) {
+				res.status(404).json({ message: "No post found with this id" });
+				return;
+			}
+			const post = dbPostData.get({ plain: true });
+			if (req.session.loggedIn) console.log("LOGGED IN");
+			res.render("single-post", {
+				post,
+				loggedIn: req.session.loggedIn,
+				username: req.session.username,
+			});
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json(err);
+		});
+});
+
+//GET USER POSTS
+router.get("/dashboard", withAuth, (req, res) => {
+	console.log("GETTING USER'S POST");
+	Post.findAll({
+		where: {
+			// use the ID from the session
+			user_id: req.session.user_id,
+		},
+		attributes: [
+			"id",
+			"content",
+			"title",
+			"created_at",
+
+			[
+				sequelize.literal(
+					"(SELECT COUNT(*) FROM comment WHERE post.id = comment.post_id)"
+				),
+				"comment_count",
+			],
+		],
+		include: [
+			{
+				model: Comment,
+				attributes: ["id", "comment_text", "post_id", "user_id"],
+				include: {
+					model: User,
+					attributes: ["username"],
+				},
+			},
+			{
+				model: User,
+				attributes: ["username"],
+			},
+		],
+	})
+		.then((dbPostData) => {
+			// serialize data before passing to template
+			const posts = dbPostData.map((post) => post.get({ plain: true }));
+			res.render("dashboard", {
+				posts,
+				loggedIn: req.session.loggedIn,
+				user_id: req.session.user_id,
+				username: req.session.username,
+			});
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json(err);
+		});
+});
+
+router.get("/createpost", (req, res) => {
+	Post.findAll({
+		where: {
+			// use the ID from the session
+			user_id: req.session.user_id,
+		},
+		attributes: [
+			"id",
+			"content",
+			"title",
+			"created_at",
+
+			[
+				sequelize.literal(
+					"(SELECT COUNT(*) FROM comment WHERE post.id = comment.post_id)"
+				),
+				"comment_count",
+			],
+		],
+		include: [
+			{
+				model: Comment,
+				attributes: ["id", "comment_text", "post_id", "user_id"],
+				include: {
+					model: User,
+					attributes: ["username"],
+				},
+			},
+			{
+				model: User,
+				attributes: ["username"],
+			},
+		],
+	})
+		.then((dbPostData) => {
+			// serialize data before passing to template
+			const posts = dbPostData.map((post) => post.get({ plain: true }));
+			res.render("createpost", {
+				posts,
+				loggedIn: req.session.loggedIn,
+				user_id: req.session.user_id,
+				username: req.session.username,
+			});
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json(err);
+		});
+});
+
+//EDIT POST
+
+//Edit Post route!
+router.get("/editpost/:id", (req, res) => {
+	Post.findOne({
+		where: {
+			id: req.params.id,
+		},
+		attributes: [
+			"id",
+			"content",
+			"title",
+			"created_at",
+			// [
+			// 	sequelize.literal(
+			// 		"(SELECT COUNT(*) FROM comment WHERE post.id = comment.post_id)"
+			// 	),
+			// 	"comment_count",
+			// ],
+		],
+		include: [
 			// {
 			// 	model: Comment,
-			// 	attributes: ["id", "comment_text", "post_id", "user_id", "created_at"],
+			// 	attributes: ["id", "comment_text", "post_id", "user_id"],
 			// 	include: {
 			// 		model: User,
-			// 		attributes: ["username"],
+			// 		attributes: ["first_name", "last_name"],
 			// 	},
 			// },
 			{
@@ -117,8 +274,13 @@ router.get("/post/:id", (req, res) => {
 				return;
 			}
 			const post = dbPostData.get({ plain: true });
-			if (req.session.loggedIn) console.log("LOGGED IN");
-			res.render("single-post", { post, loggedIn: req.session.loggedIn });
+			console.log(post);
+			res.render("editpost", {
+				post,
+				loggedIn: req.session.loggedIn,
+				user_id: req.session.user_id,
+				username: req.session.username,
+			});
 		})
 		.catch((err) => {
 			console.log(err);
