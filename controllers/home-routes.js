@@ -79,7 +79,7 @@ router.post("/logout", (req, res) => {
 });
 
 //GET SINGLE POST
-router.get("/post/:id", (req, res) => {
+router.get("/post/:id",  (req, res) => {
 	console.log("GET SINGLE POST");
 	Post.findOne({
 		where: {
